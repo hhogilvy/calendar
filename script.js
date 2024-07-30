@@ -7,15 +7,19 @@ addButtons.forEach(button => {
 
 function showCalendarOptions(event) {
     const eventData = JSON.parse(event.target.parentElement.getAttribute('data-event'));
-
+    
     const startTime = new Date(eventData.start).toISOString().replace(/-|:|\.\d+/g, '');
     const endTime = new Date(eventData.end).toISOString().replace(/-|:|\.\d+/g, '');
+    const startTime2 = new Date(eventData.start).toISOString();
+    const endTime2 = new Date(eventData.end).toISOString();
 
     const calendarEvent = {
         title: eventData.title,
         description: eventData.description,
         start: startTime,
-        end: endTime
+        end: endTime,
+        start2: startTime2,
+        end2: endTime2
     };
 
     // Create the pop-up container
@@ -65,15 +69,17 @@ function getGoogleCalendarUrl(eventData) {
 }
 
 function getOutlookOnlineUrl(eventData) {
-    const outlookUrl = new URL('https://outlook.office.com/calendar/0/deeplink/compose');
+    const outlookUrl = new URL('https://outlook.office.com/calendar/0/deeplink/compose?rru=addevent');
     outlookUrl.searchParams.set('subject', eventData.title);
     outlookUrl.searchParams.set('body', eventData.description);
-    alert(eventData.start.slice(0, -1));
-    outlookUrl.searchParams.set('startdt', eventData.start.slice(0, -3)); // Remove seconds
-    outlookUrl.searchParams.set('enddt', eventData.end.slice(0, -3)); // Remove seconds
+    // alert(eventData.start2);
+    // alert('2021-03-16T20:45:00Z');
+    outlookUrl.searchParams.set('startdt', eventData.start2); // Remove seconds
+    
+    
+    outlookUrl.searchParams.set('enddt', eventData.end2); // Remove seconds
     return outlookUrl.toString();
 }
-
 function downloadIcs(eventData) {
     const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
@@ -90,14 +96,18 @@ END:VCALENDAR`;
     const link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
     link.download = `${eventData.title}.ics`;
-    link.click();
+
+    document.body.appendChild(link); 
+    link.click(); 
+    document.body.removeChild(link); 
+
     closePopup(); 
 
-    // Revoke object URL to prevent memory leaks
     setTimeout(() => {
         window.URL.revokeObjectURL(link.href); 
     }, 100); 
 }
+
 
 function closePopup() {
     const popup = document.getElementById('calendar-popup');
