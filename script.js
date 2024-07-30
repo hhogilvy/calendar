@@ -65,9 +65,10 @@ function getGoogleCalendarUrl(eventData) {
 }
 
 function getOutlookOnlineUrl(eventData) {
-    const outlookUrl = new URL('https://outlook.live.com/calendar/0/view/event');
+    const outlookUrl = new URL('https://outlook.office.com/calendar/0/deeplink/compose');
     outlookUrl.searchParams.set('subject', eventData.title);
     outlookUrl.searchParams.set('body', eventData.description);
+    alert(eventData.start.slice(0, -1));
     outlookUrl.searchParams.set('startdt', eventData.start.slice(0, -3)); // Remove seconds
     outlookUrl.searchParams.set('enddt', eventData.end.slice(0, -3)); // Remove seconds
     return outlookUrl.toString();
