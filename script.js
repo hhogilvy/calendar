@@ -25,33 +25,35 @@ function showCalendarOptions(event) {
     // Create the pop-up container
     const popup = document.createElement('div');
     popup.id = 'calendar-popup';
-    popup.style.position = 'fixed';
-    popup.style.top = '0';
-    popup.style.left = '0';
-    popup.style.width = '100%';
-    popup.style.height = '100' ;
-    popup.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-    popup.style.display = 'flex';
-    popup.style.justifyContent = 'center';
-    popup.style.alignItems = 'center';
-    popup.style.zIndex = '1000';
+    // popup.style.position = 'fixed';
+    // popup.style.top = '0';
+    // popup.style.left = '0';
+    // popup.style.width = '100%';
+    // popup.style.height = '100' ;
+    // popup.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    // popup.style.display = 'flex';
+    // popup.style.justifyContent = 'center';
+    // popup.style.alignItems = 'center';
+    // popup.style.zIndex = '1000';
 
     // Create the pop-up content
     const popupContent = document.createElement('div');
-    popupContent.style.backgroundColor = '#fff';
-    popupContent.style.padding = '20px';
-    popupContent.style.borderRadius = '5px';
+    // popupContent.style.backgroundColor = '#fff';
+    // popupContent.style.padding = '20px';
+    // popupContent.style.borderRadius = '5px';
 
     // Add calendar options
     popupContent.innerHTML = `
+    <div class="inner-wrapper">
         <h2>Add to Calendar</h2>
         <p>Choose your preferred calendar:</p>
         <ul>
             <li><a href="${getGoogleCalendarUrl(calendarEvent)}" target="_blank">Google Calendar</a></li>
             <li><a href="${getOutlookOnlineUrl(calendarEvent)}" target="_blank">Outlook Online</a></li>
-            <li><a href="#" onclick="downloadIcs(${JSON.stringify(calendarEvent)}); return false;">Download .ics File</a></li>
+            <!--<li><a href="#" onclick="downloadIcs(${JSON.stringify(calendarEvent)}); return false;">Download .ics File</a></li>-->
         </ul>
         <button onclick="closePopup()">Close</button>
+        </div>
     `;
 
     // Append the content to the pop-up and the pop-up to the body
@@ -69,14 +71,14 @@ function getGoogleCalendarUrl(eventData) {
 }
 
 function getOutlookOnlineUrl(eventData) {
-    const outlookUrl = new URL('https://outlook.office.com/calendar/0/deeplink/compose?rru=addevent');
+    //const outlookUrl = new URL('https://outlook.office.com/calendar/0/deeplink/compose?rru=addevent');
+    const outlookUrl = new URL('https://outlook.office.com/owa/?path=/calendar/action/compose&rru=addevent&');
+
     outlookUrl.searchParams.set('subject', eventData.title);
     outlookUrl.searchParams.set('body', eventData.description);
-    // alert(eventData.start2);
+    
     // alert('2021-03-16T20:45:00Z');
     outlookUrl.searchParams.set('startdt', eventData.start2); // Remove seconds
-    
-    
     outlookUrl.searchParams.set('enddt', eventData.end2); // Remove seconds
     return outlookUrl.toString();
 }
