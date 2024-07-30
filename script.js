@@ -2,11 +2,10 @@
 const addButtons = document.querySelectorAll('.add-to-calendar');
 
 addButtons.forEach(button => {
-    
-    button.addEventListener('click', addToCalendar);
+    button.addEventListener('click', showCalendarOptions);
 });
 
-function addToCalendar(event) {
+function showCalendarOptions(event) {
     const eventData = JSON.parse(event.target.parentElement.getAttribute('data-event'));
 
     const startTime = new Date(eventData.start).toISOString().replace(/-|:|\.\d+/g, '');
@@ -19,13 +18,61 @@ function addToCalendar(event) {
         end: endTime
     };
 
-    // Choose a method for adding to calendar:
-    // 1. Download .ics file (simplest, but requires user action)
-    //downloadIcs(calendarEvent);
+    // Create the pop-up container
+    const popup = document.createElement('div');
+    popup.id = 'calendar-popup';
+    popup.style.position = 'fixed';
+    popup.style.top = '0';
+    popup.style.left = '0';
+    popup.style.width = '100%';
+    popup.style.height = '100' ;
+    popup.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    popup.style.display = 'flex';
+    popup.style.justifyContent = 'center';
+    popup.style.alignItems = 'center';
+    popup.style.zIndex = '1000';
 
-    // 2. Open calendar app with pre-filled event (more complex, may not work on all devices/browsers)
-     openCalendarApp(calendarEvent);
+    // Create the pop-up content
+    const popupContent = document.createElement('div');
+    popupContent.style.backgroundColor = '#fff';
+    popupContent.style.padding = '20px';
+    popupContent.style.borderRadius = '5px';
+
+    // Add calendar options
+    popupContent.innerHTML = `
+        <h2>Add to Calendar</h2>
+        <p>Choose your preferred calendar:</p>
+        <ul>
+            <li><a href="${getGoogleCalendarUrl(calendarEvent)}" target="_blank">Google Calendar</a></li>
+            <li><a href="${getOutlookOnlineUrl(calendarEvent)}" target="_blank">Outlook Online</a></li>
+            <li><a href="#" onclick="downloadIcs(${JSON.stringify(calendarEvent)}); return false;">Download .ics File</a></li>
+        </ul>
+        <button onclick="closePopup()">Close</button>
+    `;
+
+    // Append the content to the pop-up and the pop-up to the body
+    popup.appendChild(popupContent);
+    document.body.appendChild(popup);
 }
+
+function getGoogleCalendarUrl(eventData) {
+    const googleCalendarUrl = new URL('https://calendar.google.com/calendar/render');
+    googleCalendarUrl.searchParams.set('action', 'TEMPLATE');
+    googleCalendarUrl.searchParams.set('text', eventData.title);
+    googleCalendarUrl.searchParams.set('dates', `${eventData.start}/${eventData.end}`);
+    googleCalendarUrl.searchParams.set('details', eventData.description);
+    return googleCalendarUrl.toString();
+}
+
+function getOutlookOnlineUrl(eventData) {
+    const outlookUrl = new URL('https://outlook.live.com/calendar/0/view/event');
+    outlookUrl.searchParams.set('subject', eventData.title);
+    outlookUrl.searchParams.set('body', eventData.description);
+    outlookUrl.searchParams.set('startdt', eventData.start.slice(0, -3)); // Remove seconds
+    outlookUrl.searchParams.set('enddt', eventData.end.slice(0, -3)); // Remove seconds
+    return outlookUrl.toString();
+}
+
 function downloadIcs(eventData) {
     const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
@@ -43,17 +90,17 @@ END:VCALENDAR`;
     link.href = window.URL.createObjectURL(blob);
     link.download = `${eventData.title}.ics`;
     link.click();
+    closePopup(); 
+
+    // Revoke object URL to prevent memory leaks
+    setTimeout(() => {
+        window.URL.revokeObjectURL(link.href); 
+    }, 100); 
 }
 
-function openCalendarApp(eventData) {
-    // Constructing the URL might require different approaches 
-    // depending on the calendar app (Google Calendar, Outlook, etc.)
-    // Here's a basic example for Google Calendar:
-    const googleCalendarUrl = new URL('https://calendar.google.com/calendar/render');
-    googleCalendarUrl.searchParams.set('action', 'TEMPLATE');
-    googleCalendarUrl.searchParams.set('text', eventData.title);
-    googleCalendarUrl.searchParams.set('dates', `${eventData.start}+${eventData.end}`);
-    googleCalendarUrl.searchParams.set('details', eventData.description);
-
-    window.open(googleCalendarUrl, '_blank');
+function closePopup() {
+    const popup = document.getElementById('calendar-popup');
+    if (popup) {
+        document.body.removeChild(popup);
+    }
 }
